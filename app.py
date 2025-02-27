@@ -90,7 +90,6 @@ st.download_button(
     label=f"Download {file.name} as {conversions_type}",
     data=buffer,
     file_name=file_name,
-    mime=mime_type
+    mime=mime_type)
+st.success("🚀 All files processed successfully !")
 
-    st.success("🚀 All files processed successfully !")
-)
