@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import os
 from io import BytesIO
 
@@ -31,7 +32,7 @@ if uploaded_files:
 
         if file_ext == ".csv":
             df = pd.read_csv(file)
-        elif file_ext == ".xlsx":
+        elif file_ext in [".xlsx", ".xls"]:
             df = pd.read_excel(file)
         else:
             st.error(f"Unsupported file type: {file_ext}")
@@ -53,7 +54,7 @@ if uploaded_files:
 
             with col2:
                 if st.button(f"Fill Missing Values for {file.name}"):
-                    numeric_cols = df.select_dtypes(include=['number']).columns
+                    numeric_cols = df.select_dtypes(include=[np.number]).columns
                     df[numeric_cols] = df[numeric_cols].fillna(df[numeric_cols].mean())
                     st.write("✅ Missing values have been filled")
 
@@ -65,11 +66,11 @@ if uploaded_files:
         # Data Visualization
         st.subheader("📉 Data Visualization")
         if st.checkbox(f"Show visualization for {file.name}"):
-            st.bar_chart(df.select_dtypes(include=['number']).iloc[:, :2])
+            st.bar_chart(df.select_dtypes(include=[np.number]).iloc[:, :2])
 
         # Conversion Options
         st.subheader("🔄 Conversion Options")
-        conversions_type = st.radio(f"Convert {file.name} to:", ["CSV", "Excel"], key=file.name)
+        conversions_type = st.radio(f"Convert {file.name} to:", ["CSV", "Excel"], key=str(hash(file.name)))
 
         if st.button(f"Convert {file.name}"):
             buffer = BytesIO()
@@ -82,7 +83,7 @@ if uploaded_files:
                 file_name = file.name.replace(file_ext, ".xlsx")
                 mime_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
-            buffer.seek(0)
+            buffer.seek(0)  # Ensure file pointer is at the start
 
             st.download_button(
                 label=f"Download {file.name} as {conversions_type}",
